@@ -6,15 +6,20 @@ We just parse input and call methods from other modules.
 
 #do NOT import ways. This should be done from other files
 #simply import your modules and call the appropriate functions
+from ways.tools import compute_distance
+from ways.graph import load_map_from_csv
 
 def huristic_function(lat1, lon1, lat2, lon2):
-
     raise NotImplementedError
 
 
 def find_ucs_rout(source, target):
     'call function to find path, and return list of indices'
-    raise NotImplementedError
+    roads = load_map_from_csv(count=100)
+    #lat1, lon1, lat2, lon2
+    print(compute_distance(roads[source].lat,roads[source].lon,
+                           roads[target].lat,roads[target].lon))
+    #raise NotImplementedError
 
 
 def find_astar_route(source, target):
