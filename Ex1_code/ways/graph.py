@@ -63,7 +63,7 @@ class Roads(dict):
         multiplier = (tools.cos((time*_a + _delta_dist)*tools.pi/(15*2))/3)+1
         return int(min(top,self.link_speed_history(link,time)*multiplier))
         
-    def return_focus(self, start):
+    def return_focus(self, start,max_depth = 15):
         found = set()
         start_node =self[start]
         _next = {l for l in start_node.links}
@@ -71,7 +71,7 @@ class Roads(dict):
             _next_next = {l for k in _next for l in self[k.target].links if l not in found} #might even be able to drop the "l not in found" thing.
             found |= _next
             _next = _next_next
-            if (len(found)>15):
+            if (len(found)>max_depth):
                 break
         return found
                     
