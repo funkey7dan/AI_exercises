@@ -1,4 +1,5 @@
 import heapq
+from Ex1_code.ways.info import SPEED_RANGES
 
 
 class Node:
@@ -124,7 +125,7 @@ class RoutingProblem:
 
     def step_cost(self, s, a):
         link = list(filter(lambda x: x.target == a, self.G[s].links))[0]
-        return link.distance
+        return link.distance / SPEED_RANGES[link.highway_type][1] * 1000
 
     def state_str(self, s):
         return s

@@ -3,33 +3,30 @@ Parse input and run appropriate code.
 Don't use this file for the actual work; only minimal code should be here.
 We just parse input and call methods from other modules.
 """
-
 # do NOT import ways. This should be done from other files
 # simply import your modules and call the appropriate functions
 from ways.tools import compute_distance,timed
 from ways.graph import load_map_from_csv
-from ways.ucs import ucs
+from ways.algorithms import ucs,a_star,ida_star
 
-
-
-
+roads = load_map_from_csv(count = 100000)
 def huristic_function(lat1, lon1, lat2, lon2):
     return compute_distance(lat1, lon1, lat2, lon2)
 
 def find_ucs_rout(source, target):
     "call function to find path, and return list of indices"
-    roads = load_map_from_csv()
     return ucs(source, target, roads)
 
 
 def find_astar_route(source, target):
     "call function to find path, and return list of indices"
-    raise NotImplementedError
+
+    return a_star(source,target,roads,huristic_function)
 
 
 def find_idastar_route(source, target):
     "call function to find path, and return list of indices"
-    raise NotImplementedError
+    return ida_star(source,target,roads,huristic_function)
 
 
 @timed

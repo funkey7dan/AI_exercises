@@ -8,6 +8,7 @@ from . import tools
 from . import info
 import sys
 
+
 #define class Link_traffic_params
 # Some additional parameters for a link
 Link_traffic_params = namedtuple('Link_traffic_params',['cos_frequency','sin_frequency',])
