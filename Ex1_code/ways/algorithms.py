@@ -2,19 +2,7 @@ from . import PriorityQueue,Node,RoutingProblem
 from Ex1_code.ways.info import SPEED_RANGES
 import sys
 
-# def dfs_contour(problem,f_limit,f_function):
-#     frontier = [(Node(problem.s_start))]
-#     while frontier:
-#         node = frontier.pop()
-#         if f_function(node) > f_limit:
-#             return None,f_function(node)
-#         if problem.is_goal(node.state):
-#             return node.solution(),f_limit
-#         if node.depth < f_limit:
-#             frontier.extend(node.expand(problem))
-#     return None
-
-def dfs_contour(node,problem,f_limit,f_function):
+def dfs_contour(node,problem,f_limit,f_function,closed_list,graph_search = False):
     successors = node.expand(problem)
     if f_function(node) > f_limit:
         return None,f_function(node)
@@ -22,46 +10,32 @@ def dfs_contour(node,problem,f_limit,f_function):
         return node,f_limit
     next_f = sys.maxsize
     for child in successors:
-        result,new_f = dfs_contour(child,problem,f_limit,f_function)
-        if result:
-            return result,f_limit
-        next_f = min(new_f,next_f)
+        if child not in closed_list:
+            if graph_search: closed_list.append(child)
+            result,new_f = dfs_contour(child,problem,f_limit,f_function,graph_search=graph_search,closed_list=closed_list)
+            if result:
+                return result,f_limit
+            next_f = min(new_f,next_f)
     return None,next_f
 
-# def ida_star(s,t,G,heuristic):
-#     problem = RoutingProblem(s,t,G)
-#     def g(node):
-#         if node.state == s:
-#             return 0
-#         return node.path_cost  #l = list(filter(lambda x: x.source == s and x.target == node.state,links))
-#     def h(node):
-#         return heuristic(G[node.state].lat,G[node.state].lon,G[t].lat,G[t].lon)/(max(SPEED_RANGES,key = lambda x: x[1]))[1]
-#
-#     f_limit = h(Node(problem.s_start))
-#     for depth in range(1,1000):
-#         result,f_limit = dfs_contour(problem,f_limit,f_function = lambda x: g(x) + h(x))
-#         if result:
-#             return result
-#     return None
 def ida_star(s,t,G,heuristic):
     problem = RoutingProblem(s,t,G)
     def g(node):
         if node.state == s:
             return 0
-        return node.path_cost  #l = list(filter(lambda x: x.source == s and x.target == node.state,links))
+        return node.path_cost
     def h(node):
         return heuristic(G[node.state].lat,G[node.state].lon,G[t].lat,G[t].lon)/(max(SPEED_RANGES,key = lambda x: x[1]))[1]
 
-
     initial = Node(problem.s_start)
     f_limit = h(initial)
+    closed_list = []
     while True:
-        result,f_limit = dfs_contour(initial,problem,f_limit,f_function = lambda x: g(x) + h(x))
+        result,f_limit = dfs_contour(initial,problem,f_limit,f_function = lambda x: g(x) + h(x),graph_search = False,closed_list=closed_list)
         if result:
             return result
         if f_limit == sys.maxsize:
             return None
-    return None
 
 def bfgs(problem,f_function):
     frontier = PriorityQueue(f_function)

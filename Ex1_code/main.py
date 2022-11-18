@@ -9,7 +9,8 @@ from ways.tools import compute_distance,timed
 from ways.graph import load_map_from_csv
 from ways.algorithms import ucs,a_star,ida_star
 
-roads = load_map_from_csv(count = 100000)
+roads = None
+
 def huristic_function(lat1, lon1, lat2, lon2):
     return compute_distance(lat1, lon1, lat2, lon2)
 
@@ -31,8 +32,8 @@ def find_idastar_route(source, target):
 
 @timed
 def dispatch(argv):
-
-
+    global roads
+    roads = load_map_from_csv()
     source, target = int(argv[2]), int(argv[3])
     if argv[1] == "ucs":
         path = find_ucs_rout(source, target)
