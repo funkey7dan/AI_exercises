@@ -1,3 +1,5 @@
+""" Daniel Bronfman 315901173"""
+
 '''
  A set of utilities for using israel.csv 
  The map is extracted from the openstreetmap project

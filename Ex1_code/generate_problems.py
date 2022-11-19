@@ -1,7 +1,8 @@
+""" Daniel Bronfman 315901173"""
 import time
-from Ex1_code.ways.algorithms import ida_star
-from Ex1_code.ways.draw import plot_path
-from Ex1_code.ways.info import SPEED_RANGES
+from ways.algorithms import ida_star
+from ways.draw import plot_path
+from ways.info import SPEED_RANGES
 from ways.graph import load_map_from_csv
 from main import ucs,a_star,huristic_function
 
@@ -12,7 +13,7 @@ import numpy as np
 
 TO_GENERATE = 100
 SOLUTIONS_TO_RUN = 100
-roads = load_map_from_csv(count = 1000)
+roads = load_map_from_csv()
 
 
 def generate_solutions():
@@ -32,12 +33,13 @@ def generate_solutions():
                 t = problems[r][1]
                 start = time.perf_counter()
                 path = ucs(int(s),int(t),roads)
-                times.append(time.perf_counter() - start)
+                if _ < 10:
+                    times.append(time.perf_counter() - start)
                 sol = path.solution()
                 path_time = 0
                 for i in range(0,len(sol)-1):
                     path_time += ((roads.distance_from_links(sol[i],sol[i+1])/1000) / SPEED_RANGES[roads.get_roadtype(sol[i],sol[i+1])][1])
-                out.write(' '.join(str(j) for j in path.solution())+" - "+str(path_time*60))
+                out.write(' '.join(str(j) for j in path.solution())+" - "+str(round(path_time*360,4)))
                 out.write("\n")
             print("UCS: ",round(np.mean(times),7))
             times.clear()
@@ -58,7 +60,8 @@ def generate_solutions():
                 #print(s+"->"+t)
                 start = time.perf_counter()
                 path = a_star(int(s),int(t),roads,huristic_function)
-                times.append(time.perf_counter() - start)
+                if _ < 10:
+                    times.append(time.perf_counter() - start)
                 sol = path.solution()
                 path_time = 0
                 s = int(s)
@@ -66,7 +69,7 @@ def generate_solutions():
                 h_time = huristic_function(roads[s].lat,roads[s].lon,roads[t].lat,roads[t].lon) / (max(SPEED_RANGES,key = lambda x: x[1]))[1]
                 for i in range(0,len(sol)-1):
                     path_time += ((roads.distance_from_links(sol[i],sol[i+1])/1000) / SPEED_RANGES[roads.get_roadtype(sol[i],sol[i+1])][1])
-                out.write(' '.join(str(j) for j in path.solution())+" - "+str(path_time*60)+" - "+str(h_time*60))
+                out.write(' '.join(str(j) for j in path.solution())+" - "+str(round(path_time*360,4))+" - "+str(round(h_time*360,4)))
                 out.write("\n")
                 x_values.append(h_time*60)
                 y_values.append(path_time*60)
@@ -79,7 +82,8 @@ def generate_solutions():
         plt.clf()
         out = open("./results/IDAStarRuns.txt","w")
         seen_list = []
-        for _ in range(0,SOLUTIONS_TO_RUN):
+        for _ in range(0,10):
+            #print(_)
             #r = random.randint(0,len(problems) - 1)
             #while r in seen_list:
                 #r = random.randint(0,len(problems) - 1)
@@ -104,7 +108,7 @@ def generate_solutions():
                 path_time += ((roads.distance_from_links(sol[i],sol[i + 1]) / 1000) /
                               SPEED_RANGES[roads.get_roadtype(sol[i],sol[i + 1])][1])
             out.write(
-                ' '.join(str(j) for j in path.solution()) + " - " + str(path_time * 60) + " - " + str(h_time * 60))
+                ' '.join(str(j) for j in path.solution()) + " - " + str(round(path_time * 360,4)) + " - " + str(round(h_time*360,4)))
             out.write("\n")
         out.close()
         print("IDA*: ",round(np.mean(times),7))
@@ -121,15 +125,13 @@ def generate_problems():
                 j1 = random.randint(0,len(roads) - 1)
             closure = sorted(roads.return_focus(j1,max_depth = 5))
             closure_flat = list(set(map(lambda x: x.target,closure)))
-            # closure_flat = set(map(lambda x: x.target,closure))
             j2 = random.randint(0,len(roads) - 1)
-            while j2 not in closure_flat and j2 != j1:
+            while j2 not in closure_flat or j2 == j1:
                 j2 = closure_flat[random.randint(0,len(closure_flat) - 1)]
             problems.append((j1,j2))
         problems.sort(key = lambda x: abs(int(x[0]) - int(x[1])),reverse = True)
         writer.writerows(problems)
         f.close()
-        pass
 
 
 if __name__ == "__main__":

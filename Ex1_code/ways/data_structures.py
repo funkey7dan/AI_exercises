@@ -1,5 +1,7 @@
+""" Daniel Bronfman 315901173"""
+
 import heapq
-from Ex1_code.ways.info import SPEED_RANGES
+from ways.info import SPEED_RANGES
 
 
 class Node:
@@ -9,19 +11,22 @@ class Node:
         self.action = action
         self.path_cost = path_cost
         self.depth = 0
+        self.succ = []
         if parent:
             self.depth = parent.depth + 1
 
     def expand(self, problem):
-        # remove duplicates while preserving order
-        return list(
-            dict.fromkeys(
-                [
-                    self.child_node(problem, action)
-                    for action in problem.actions(self.state)
-                ]
+        if len(self.succ) == 0:
+            # remove duplicates while preserving order
+            self.succ = list(
+                dict.fromkeys(
+                    [
+                        self.child_node(problem, action)
+                        for action in problem.actions(self.state)
+                    ]
+                )
             )
-        )
+        return self.succ
 
     def child_node(self, problem, action):
         next_state = problem.succ(self.state, action)

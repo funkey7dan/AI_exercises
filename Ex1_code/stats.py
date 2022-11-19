@@ -1,3 +1,4 @@
+""" Daniel Bronfman 315901173"""
 '''
 This file should be runnable to print map_statistics using 
 $ python stats.py
@@ -31,7 +32,7 @@ def map_statistics(roads):
 
 
 def print_stats():
-    for k, v in map_statistics(load_map_from_csv(count=100)).items():
+    for k, v in map_statistics(load_map_from_csv()).items():
         print('{}: {}'.format(k, v))
 
         

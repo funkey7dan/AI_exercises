@@ -1,3 +1,5 @@
+""" Daniel Bronfman 315901173"""
+
 '''Constants - details about the map.
 accessible using "import ways.info'''
 

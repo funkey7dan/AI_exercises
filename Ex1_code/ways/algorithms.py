@@ -1,22 +1,42 @@
+""" Daniel Bronfman 315901173"""
+
 from . import PriorityQueue,Node,RoutingProblem
-from Ex1_code.ways.info import SPEED_RANGES
+from ways.info import SPEED_RANGES
 import sys
+DEPTH_LIMIT = sys.maxsize
 
 def dfs_contour(node,problem,f_limit,f_function,closed_list,graph_search = False):
-    successors = node.expand(problem)
-    if f_function(node) > f_limit:
-        return None,f_function(node)
+    successors = sorted(node.expand(problem),key = f_function)
     if problem.is_goal(node.state):
         return node,f_limit
-    next_f = sys.maxsize
+    if f_function(node) > f_limit:
+        return None,f_function(node)
+    next_f = DEPTH_LIMIT
     for child in successors:
-        if child not in closed_list:
+        if child not in closed_list and child:
             if graph_search: closed_list.append(child)
             result,new_f = dfs_contour(child,problem,f_limit,f_function,graph_search=graph_search,closed_list=closed_list)
             if result:
                 return result,f_limit
             next_f = min(new_f,next_f)
     return None,next_f
+
+def dfs_rec(node,problem,f_limit,f_function,closed_list,graph_search = False):
+    successors = sorted(node.expand(problem),key = f_function)
+    if problem.is_goal(node.state):
+        return node,f_limit
+    if f_function(node) > f_limit:
+        return None,f_function(node)
+    next_f = DEPTH_LIMIT
+    for child in successors:
+        if child not in closed_list and child:
+            if graph_search: closed_list.append(child)
+            result,new_f = dfs_contour(child,problem,f_limit,f_function,graph_search=graph_search,closed_list=closed_list)
+            if result:
+                return result,f_limit
+            next_f = min(new_f,next_f)
+    return None,next_f
+
 
 def ida_star(s,t,G,heuristic):
     problem = RoutingProblem(s,t,G)
@@ -34,7 +54,7 @@ def ida_star(s,t,G,heuristic):
         result,f_limit = dfs_contour(initial,problem,f_limit,f_function = lambda x: g(x) + h(x),graph_search = False,closed_list=closed_list)
         if result:
             return result
-        if f_limit == sys.maxsize:
+        if f_limit == DEPTH_LIMIT:
             return None
 
 def bfgs(problem,f_function):

@@ -1,3 +1,5 @@
+""" Daniel Bronfman 315901173"""
+
 'accessible using "import ways.draw"'
 
 
@@ -18,7 +20,7 @@ def plot_path(roads, path, color='g'):
     e.g. [0, 33, 54, 60]
     Don't forget plt.show()'''
     flons, tolons, flats, tolats = [] ,[] ,[] ,[]
-    for s, t in zip(path[:-1], path[1:]):
+    for s, t in zip(path, path):
         ps, pt = roads[s], roads[t]
         flons.append(ps.lon)
         tolons.append(pt.lon)
