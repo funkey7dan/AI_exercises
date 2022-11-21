@@ -129,11 +129,10 @@ class RoutingProblem:
         return s == self.goal
 
     def step_cost(self, s, a):
+        # get the distance in meters from the list
         link = list(filter(lambda x: x.target == a, self.G[s].links))[0]
-        return link.distance / SPEED_RANGES[link.highway_type][1] * 1000
-
-    def state_str(self, s):
-        return s
+        # M/1000 = KM / KPH = H
+        return link.distance / 1000 / SPEED_RANGES[link.highway_type][1]
 
     def __repr__(self):
         return {"s_start": self.s_start, "goal": self.goal, "graph": self.G}

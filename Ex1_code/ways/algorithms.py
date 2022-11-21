@@ -5,38 +5,20 @@ from ways.info import SPEED_RANGES
 import sys
 DEPTH_LIMIT = sys.maxsize
 
-def dfs_contour(node,problem,f_limit,f_function,closed_list,graph_search = False):
-    successors = sorted(node.expand(problem),key = f_function)
+def dfs_contour(node,problem,f_limit,f_function,direction=True):
     if problem.is_goal(node.state):
         return node,f_limit
     if f_function(node) > f_limit:
         return None,f_function(node)
-    next_f = DEPTH_LIMIT
-    for child in successors:
-        if child not in closed_list and child:
-            if graph_search: closed_list.append(child)
-            result,new_f = dfs_contour(child,problem,f_limit,f_function,graph_search=graph_search,closed_list=closed_list)
-            if result:
-                return result,f_limit
-            next_f = min(new_f,next_f)
-    return None,next_f
-
-def dfs_rec(node,problem,f_limit,f_function,closed_list,graph_search = False):
     successors = sorted(node.expand(problem),key = f_function)
-    if problem.is_goal(node.state):
-        return node,f_limit
-    if f_function(node) > f_limit:
-        return None,f_function(node)
+    #successors = node.expand(problem)
     next_f = DEPTH_LIMIT
     for child in successors:
-        if child not in closed_list and child:
-            if graph_search: closed_list.append(child)
-            result,new_f = dfs_contour(child,problem,f_limit,f_function,graph_search=graph_search,closed_list=closed_list)
-            if result:
-                return result,f_limit
-            next_f = min(new_f,next_f)
+        result,new_f = dfs_contour(child,problem,f_limit,f_function)
+        if result:
+            return result,f_limit
+        next_f = min(new_f,next_f)
     return None,next_f
-
 
 def ida_star(s,t,G,heuristic):
     problem = RoutingProblem(s,t,G)
@@ -45,13 +27,13 @@ def ida_star(s,t,G,heuristic):
             return 0
         return node.path_cost
     def h(node):
+        # KM / (KPH) = H (return expected time in hours)
         return heuristic(G[node.state].lat,G[node.state].lon,G[t].lat,G[t].lon)/(max(SPEED_RANGES,key = lambda x: x[1]))[1]
 
     initial = Node(problem.s_start)
     f_limit = h(initial)
-    closed_list = []
     while True:
-        result,f_limit = dfs_contour(initial,problem,f_limit,f_function = lambda x: g(x) + h(x),graph_search = False,closed_list=closed_list)
+        result,f_limit = dfs_contour(initial,problem,f_limit,f_function = lambda x: g(x) + h(x))
         if result:
             return result
         if f_limit == DEPTH_LIMIT:
@@ -99,8 +81,7 @@ def a_star(s,t,G,heuristic):
             return 0
         return node.path_cost  #l = list(filter(lambda x: x.source == s and x.target == node.state,links))
     def h(node):
-        return heuristic(G[node.state].lat,G[node.state].lon,G[t].lat,G[t].lon) / \
-               (max(SPEED_RANGES,key = lambda x: x[1]))[1]
+        return heuristic(G[node.state].lat,G[node.state].lon,G[t].lat,G[t].lon) / (max(SPEED_RANGES,key = lambda x: x[1]))[1]
 
     return bfgs(problem = problem,f_function = lambda x: g(x) + h(x))
 

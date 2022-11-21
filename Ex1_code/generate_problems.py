@@ -91,6 +91,7 @@ def generate_solutions():
             r = _
             s = problems[r][0]
             t = problems[r][1]
+            print(_)
             start = time.perf_counter()
             path = ida_star(int(s),int(t),roads,huristic_function)
             times.append(time.perf_counter() - start)
@@ -123,9 +124,9 @@ def generate_problems():
             j1 = random.randint(0,len(roads) - 1)
             while len(roads[j1].links) == 0:
                 j1 = random.randint(0,len(roads) - 1)
-            closure = sorted(roads.return_focus(j1,max_depth = 5))
+            closure = sorted(roads.return_focus(j1,max_depth = 15))
             closure_flat = list(set(map(lambda x: x.target,closure)))
-            j2 = random.randint(0,len(roads) - 1)
+            j2 = random.randint(j1+1,len(roads) - 1)
             while j2 not in closure_flat or j2 == j1:
                 j2 = closure_flat[random.randint(0,len(closure_flat) - 1)]
             problems.append((j1,j2))
