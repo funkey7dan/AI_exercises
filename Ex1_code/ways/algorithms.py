@@ -5,7 +5,7 @@ from ways.info import SPEED_RANGES
 import sys
 DEPTH_LIMIT = sys.maxsize
 
-def dfs_contour(node,problem,f_limit,f_function,direction=True):
+def dfs_contour(node,problem,f_limit,f_function):
     if problem.is_goal(node.state):
         return node,f_limit
     if f_function(node) > f_limit:

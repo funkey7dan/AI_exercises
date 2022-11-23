@@ -31,10 +31,7 @@ def find_idastar_route(source, target):
     return ida_star(source,target,roads,huristic_function)
 
 
-@timed
 def dispatch(argv):
-    global roads
-    roads = load_map_from_csv()
     source, target = int(argv[2]), int(argv[3])
     if argv[1] == "ucs":
         path = find_ucs_rout(source, target)
@@ -49,5 +46,5 @@ def dispatch(argv):
 
 if __name__ == "__main__":
     from sys import argv
-
+    roads = load_map_from_csv()
     dispatch(argv)

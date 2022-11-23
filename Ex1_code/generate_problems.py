@@ -11,7 +11,7 @@ import csv
 import matplotlib.pyplot as plt
 import numpy as np
 
-TO_GENERATE = 100
+TO_GENERATE = 90
 SOLUTIONS_TO_RUN = 100
 roads = load_map_from_csv()
 
@@ -20,38 +20,43 @@ def generate_solutions():
     with open("problems.csv","r",newline = "") as f:
         reader = csv.reader(f)
         problems = list(reader)
+
+        #### UCS ####
         with open("./results/UCSRuns.txt","w") as out:
-            seen_list = []
+            ucs_solutions = []
             times = []
+            times_dict = {}
             for _ in range(0,SOLUTIONS_TO_RUN):
                 #r = random.randint(0,len(problems) - 1)
-                #while r in seen_list:
-                    #r = random.randint(0,len(problems) - 1)
-                #seen_list.append(r)
+
                 r = _
                 s = problems[r][0]
                 t = problems[r][1]
                 start = time.perf_counter()
                 path = ucs(int(s),int(t),roads)
-                if _ < 10:
-                    times.append(time.perf_counter() - start)
+                #if _ < 10:
+                ti = time.perf_counter() - start
+                times_dict[(int(s),int(t))] = ti
                 sol = path.solution()
                 path_time = 0
                 for i in range(0,len(sol)-1):
                     path_time += ((roads.distance_from_links(sol[i],sol[i+1])/1000) / SPEED_RANGES[roads.get_roadtype(sol[i],sol[i+1])][1])
+                ucs_solutions.append([n for n in path.solution()])
                 out.write(' '.join(str(j) for j in path.solution())+" - "+str(round(path_time*360,4)))
                 out.write("\n")
+            ucs_solutions.sort(key = len,reverse = True)
+            for i in range(0,10):
+                times.append(times_dict[(ucs_solutions[i][0],ucs_solutions[i][-1])])
             print("UCS: ",round(np.mean(times),7))
             times.clear()
+            times_dict = {}
+
+        #### A* ####
+
         with open("./results/AStarRuns.txt","w") as out:
-            seen_list = []
             x_values = []
             y_values = []
             for _ in range(0,SOLUTIONS_TO_RUN):
-                r = random.randint(0,len(problems) - 1)
-                while r in seen_list:
-                    r = random.randint(0,len(problems) - 1)
-                seen_list.append(r)
                 r = _
                 s = problems[r][0]
                 t = problems[r][1]
@@ -60,8 +65,8 @@ def generate_solutions():
                 #print(s+"->"+t)
                 start = time.perf_counter()
                 path = a_star(int(s),int(t),roads,huristic_function)
-                if _ < 10:
-                    times.append(time.perf_counter() - start)
+                ti = time.perf_counter() - start
+                times_dict[(int(s),int(t))] = ti
                 sol = path.solution()
                 path_time = 0
                 s = int(s)
@@ -73,6 +78,8 @@ def generate_solutions():
                 out.write("\n")
                 x_values.append(h_time*60)
                 y_values.append(path_time*60)
+            for i in range(0,10):
+                times.append(times_dict[(ucs_solutions[i][0],ucs_solutions[i][-1])])
             print("A*: ",round(np.mean(times),7))
             times.clear()
         plt.xlabel("Heuristic time ")
@@ -80,18 +87,17 @@ def generate_solutions():
         plt.plot(x_values,y_values,marker='o',linestyle='none')
         plt.savefig('a_star_graph.png')
         plt.clf()
+
+        #### IDA* ####
+
         out = open("./results/IDAStarRuns.txt","w")
-        seen_list = []
         for _ in range(0,10):
             #print(_)
-            #r = random.randint(0,len(problems) - 1)
-            #while r in seen_list:
-                #r = random.randint(0,len(problems) - 1)
-            #seen_list.append(r)
             r = _
-            s = problems[r][0]
-            t = problems[r][1]
-            print(_)
+            #s = problems[r][0]
+            #t = problems[r][1]
+            s = ucs_solutions[r][0]
+            t = ucs_solutions[r][-1]
             start = time.perf_counter()
             path = ida_star(int(s),int(t),roads,huristic_function)
             times.append(time.perf_counter() - start)
@@ -130,6 +136,11 @@ def generate_problems():
             while j2 not in closure_flat or j2 == j1:
                 j2 = closure_flat[random.randint(0,len(closure_flat) - 1)]
             problems.append((j1,j2))
+        # add problems that do not result in loops for ida* to run (allowed by Osnat in the forum)
+        problems+=[(145001,145018),(5542,38730),(5542,38730),(72661,72675),
+                         (31943,31944),(4024,87868),(911910,911974),(750758,907704),(522028,522021),(530433,530440)]
+
+        # sort by difference in indices
         problems.sort(key = lambda x: abs(int(x[0]) - int(x[1])),reverse = True)
         writer.writerows(problems)
         f.close()
@@ -137,7 +148,8 @@ def generate_problems():
 
 if __name__ == "__main__":
     from sys import argv
-    assert len(argv) == 1
-
-    generate_problems()
-    generate_solutions()
+    #assert len(argv) == 1
+    if "--no_gen" not in argv:
+        generate_problems()
+    if "--no_sol" not in argv:
+        generate_solutions()

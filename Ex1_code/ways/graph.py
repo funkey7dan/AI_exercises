@@ -10,7 +10,6 @@ from . import tools
 from . import info
 import sys
 
-
 #define class Link_traffic_params
 # Some additional parameters for a link
 Link_traffic_params = namedtuple('Link_traffic_params',['cos_frequency','sin_frequency',])
@@ -39,11 +38,13 @@ class Roads(dict):
 
     def __init__(self,junction_list):
         super(Roads,self).__init__(junction_list)
+        self.itelinks_list = None
         'to change the generation, simply assign to it'
         self.generation = 0
         self.base_traffic = tools.base_traffic_pattern()
         tmp = [(n.lat,n.lon) for n in junction_list.values()]
         self.mean_lat_lon = (sum([i[0] for i in tmp]) / len(tmp),sum([i[1] for i in tmp]) / len(tmp))
+        self.link_map = {}
 
     def link_speed_history(self,link,time = 0):
         'Deterministically generates the speed for the link based on "history" of the speed at time time'
@@ -77,24 +78,42 @@ class Roads(dict):
         return found
 
     def distance_from_links(self,s,t):
+        if (s,t) in self.link_map:
+            return self.link_map[(s,t)].distance
         """ Get distance between two junction indices by iterating over links """
-        for link in self.iterlinks():
-            if (link.source == s and link.target == t) or (link.source == t and link.target==s):
-                return link.distance
+        iter_list = self.iterlinks()
+        temp_list = iter_list[s:]
+        #filtered = list(filter(lambda link: (link.source == s and link.target == t) or (link.source == t and 
+        # link.target==s),iter_list))
+        filtered = [link for link in temp_list if
+                    ((link.source == s and link.target == t) or (link.source == t and link.target == s))]
+        if len(filtered) > 0:
+            self.link_map[(s,t)] = filtered[0]
+            return filtered[0].distance
         return None
 
     def get_roadtype(self,s,t):
         """ Get road type between two junction indices by iterating over links """
-        for link in self.iterlinks():
-            if (link.source == s and link.target == t) or (link.source == t and link.target==s):
-                return link.highway_type
+        if (s,t) in self.link_map:
+            return self.link_map[(s,t)].highway_type
+        """ Get distance between two junction indices by iterating over links """
+        iter_list = self.iterlinks()
+        temp_list = iter_list[s:]
+        #filtered = list(filter(lambda link: (link.source == s and link.target == t) or (link.source == t and
+        # link.target==s),iter_list))
+        filtered = [link for link in temp_list if
+                    ((link.source == s and link.target == t) or (link.source == t and link.target == s))]
+        if len(filtered) > 0:
+            self.link_map[(s,t)] = filtered[0]
+            return filtered[0].highway_type
         return None
-
 
     def iterlinks(self):
         '''chain all the links in the graph. 
         use: for link in roads.iterlinks(): ... '''
-        return (link for j in self.values() for link in j.links)
+        if not self.itelinks_list:
+            self.itelinks_list = list([link for j in self.values() for link in j.links])
+        return self.itelinks_list
 
 def _make_link(i,link_string):
     'This function is for local use only'
