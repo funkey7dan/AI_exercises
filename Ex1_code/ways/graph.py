@@ -80,7 +80,7 @@ class Roads(dict):
     def distance_from_links(self,s,t):
         if (s,t) in self.link_map:
             return self.link_map[(s,t)].distance
-        """ Get distance between two junction indices by iterating over links """
+        """ Get distance between two junction indices by iterating over links, returns the distance in meters"""
         iter_list = self.iterlinks()
         temp_list = iter_list[s:]
         #filtered = list(filter(lambda link: (link.source == s and link.target == t) or (link.source == t and 

@@ -40,9 +40,10 @@ def generate_solutions():
                 sol = path.solution()
                 path_time = 0
                 for i in range(0,len(sol)-1):
+                    # get the distance in meters, convert to KM by division, and divide by speed in KM/H to get hours
                     path_time += ((roads.distance_from_links(sol[i],sol[i+1])/1000) / SPEED_RANGES[roads.get_roadtype(sol[i],sol[i+1])][1])
                 ucs_solutions.append([n for n in path.solution()])
-                out.write(' '.join(str(j) for j in path.solution())+" - "+str(round(path_time*360,4)))
+                out.write(' '.join(str(j) for j in path.solution())+" - "+str(round(path_time,4)))
                 out.write("\n")
             ucs_solutions.sort(key = len,reverse = True)
             for i in range(0,10):
@@ -74,7 +75,7 @@ def generate_solutions():
                 h_time = huristic_function(roads[s].lat,roads[s].lon,roads[t].lat,roads[t].lon) / (max(SPEED_RANGES,key = lambda x: x[1]))[1]
                 for i in range(0,len(sol)-1):
                     path_time += ((roads.distance_from_links(sol[i],sol[i+1])/1000) / SPEED_RANGES[roads.get_roadtype(sol[i],sol[i+1])][1])
-                out.write(' '.join(str(j) for j in path.solution())+" - "+str(round(path_time*360,4))+" - "+str(round(h_time*360,4)))
+                out.write(' '.join(str(j) for j in path.solution())+" - "+str(round(path_time,4))+" - "+str(round(h_time,4)))
                 out.write("\n")
                 x_values.append(h_time*60)
                 y_values.append(path_time*60)
@@ -115,7 +116,7 @@ def generate_solutions():
                 path_time += ((roads.distance_from_links(sol[i],sol[i + 1]) / 1000) /
                               SPEED_RANGES[roads.get_roadtype(sol[i],sol[i + 1])][1])
             out.write(
-                ' '.join(str(j) for j in path.solution()) + " - " + str(round(path_time * 360,4)) + " - " + str(round(h_time*360,4)))
+                ' '.join(str(j) for j in path.solution()) + " - " + str(round(path_time,4)) + " - " + str(round(h_time,4)))
             out.write("\n")
         out.close()
         print("IDA*: ",round(np.mean(times),7))

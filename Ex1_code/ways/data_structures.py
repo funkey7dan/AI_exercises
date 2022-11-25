@@ -1,6 +1,7 @@
 """ Daniel Bronfman 315901173"""
 
 import heapq
+
 from ways.info import SPEED_RANGES
 
 
