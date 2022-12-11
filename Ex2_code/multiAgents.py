@@ -17,7 +17,12 @@ Student ID:
 import random,util,math
 
 from connect4 import Agent
+import gameUtil as u
 
+def generate_switch(game_state,action):
+    next_state = game_state.generateSuccessor(game_state.turn,action)
+    next_state.turn = next_state.switch_turn(game_state.turn)
+    return next_state
 def scoreEvaluationFunction(currentGameState):
     """
     This default evaluation function just returns the score of the state.
@@ -78,53 +83,82 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
 
         "*** YOUR CODE HERE ***"
-        action_values = {}
 
-        def minMax_Value(depth,game_state,agent_id):
-            if depth == 0:
+        def minMax_Value(depth,game_state):
+
+            if depth == 0 or game_state.is_terminal():
                 return self.evaluationFunction(game_state)
-
             # if the agent for whom we are building the tree(the maximizer) is now evaluated
-            if agent_id == self.index:
-                if game_state.isWin():
-                    return math.inf
-                if game_state.isLose():
-                    return -math.inf
+            if game_state.turn == u.AI:
                 value = -math.inf
-                leg_acts = game_state.getLegalActions(agent_id)
-                for a in leg_acts:
-                    value = max(value,
-                                minMax_Value(depth - 1,game_state.generateSuccessor(agent_id,a),(agent_id + 1) % 2))
-                    if value == math.inf:
-                        return value
+                values = (minMax_Value(depth - 1,generate_switch(game_state,a)) for a in game_state.getLegalActions())
+                return max(value,max(values))
+                # for a in game_state.getLegalActions(game_state.turn):
+                #     next_state = game_state.generateSuccessor(game_state.turn,a)
+                #     next_state.turn = next_state.switch_turn(game_state.turn)
+                #     value = max(value,minMax_Value(depth - 1,next_state))
+                # return value
+            #minimizing
             else:
-                if game_state.isWin():
-                    return math.inf
-                if game_state.isLose():
-                    return -math.inf
                 value = math.inf
-                leg_acts = game_state.getLegalActions(agent_id)
-                #states = (minMax_Value(depth-1,game_state.generateSuccessor(agent_id,a),(agent_id + 1) % 2) for a in leg_acts)
-                for a in leg_acts:
-                    value = min(value,minMax_Value(depth - 1,game_state.generateSuccessor(agent_id,a),(agent_id + 1) % 2))
-            return value
-
-        leg_acts = gameState.getLegalActions(self.index)
-        # for a in leg_acts:
-        #     if a == 5:
-        #         print('foo')
-        #     action_values[a] = minMax_Value(self.depth,gameState,self.index)
-        #action_values[4] = minMax_Value(self.depth,gameState.generateSuccessor(0,4),self.index)
-        value = minMax_Value(self.depth,gameState,self.index)
-        return max(gameState.getLegalActions(0),key = lambda x: minMax_Value(self.depth,gameState.generateSuccessor(0,x),self.index))
+                values = (minMax_Value(depth - 1,generate_switch(game_state,a)) for a in
+                          game_state.getLegalActions(game_state.turn))
+                return min(value,min(values))
+                # for a in game_state.getLegalActions(game_state.turn):
+                #     next_state = game_state.generateSuccessor(game_state.turn,a)
+                #     next_state.turn = next_state.switch_turn(game_state.turn)
+                #     value = min(value,minMax_Value(depth - 1,next_state))
+                # return value
+        results = {}
+        for act in gameState.getLegalActions(0):
+            next_state = gameState.generateSuccessor(gameState.turn,act)
+            next_state.turn = next_state.switch_turn(gameState.turn)
+            results[act] = minMax_Value(self.depth-1,next_state)
+        #print(results)
+        return max(results,key = lambda x: (results[x],x))
+        # return max(gameState.getLegalActions(0),key = lambda x: minMax_Value(self.depth,
+        # gameState))
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     def getAction(self,gameState):
         """
             Your minimax agent with alpha-beta pruning (question 2)
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        def alpha_beta_minimax(depth,game_state,alpha,beta):
+            if depth == 0 or game_state.is_terminal():
+                return self.evaluationFunction(game_state)
+
+            # maximizing player
+            if game_state.turn == u.AI:
+                value = -math.inf
+                for a in game_state.getLegalActions():
+                    # next_state = game_state.generateSuccessor(game_state.turn,a)
+                    # next_state.turn = next_state.switch_turn(game_state.turn)
+                    value = max(value,alpha_beta_minimax(depth - 1,generate_switch(game_state,a),alpha,beta))
+                    if value > beta:
+                        break
+                    alpha = max(alpha,value)
+
+            # minimizing player
+            else:
+                value = math.inf
+                for a in game_state.getLegalActions():
+                    # next_state = game_state.generateSuccessor(game_state.turn,a)
+                    # next_state.turn = next_state.switch_turn(next_state.turn)
+                    value = min(value,alpha_beta_minimax(depth - 1,generate_switch(game_state,a),alpha,beta))
+                    if value < alpha:
+                        break
+                    beta = min(beta,value)
+            return value
+
+        results = {}
+        for act in gameState.getLegalActions(0):
+            next_state = gameState.generateSuccessor(gameState.turn,act)
+            next_state.turn = next_state.switch_turn(gameState.turn)
+            results[act] = alpha_beta_minimax(self.depth-1,next_state,alpha = -math.inf,
+                                                      beta = math.inf)
+        #print(results)
+        return max(results,key = lambda x: (results[x],x))
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
@@ -136,4 +170,39 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         Returns the expectimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        def expectiminimax(depth,game_state):
+            if depth == 0 or game_state.is_terminal():
+                if game_state.turn == u.AI:
+                    return self.evaluationFunction(game_state)
+                else:
+                    return self.evaluationFunction(game_state)
+
+            if game_state.turn == u.AI:
+                value = -math.inf
+                # for a in game_state.getLegalActions():
+                #     # next_state = game_state.generateSuccessor(game_state.turn,a)
+                #     # next_state.turn = next_state.switch_turn(next_state.turn)
+                #     value = max(value,expectiminimax(depth - 1,generate_switch(game_state,a)))
+                values = (expectiminimax(depth - 1,generate_switch(game_state,a)) for a in game_state.getLegalActions())
+                return max(value,max(values))
+            else:
+                # value = 0
+                # for a in game_state.getLegalActions():
+                #     # next_state = game_state.generateSuccessor(game_state.turn,a)
+                #     # next_state.turn = next_state.switch_turn(next_state.turn)
+                #     p = 1 / len(game_state.getLegalActions())
+                #     value += p * (expectiminimax(depth - 1,generate_switch(game_state,a)))
+                p = 1 / len(game_state.getLegalActions())
+                value = sum(p *expectiminimax(depth - 1,generate_switch(game_state,a)) for a in game_state.getLegalActions())
+            return value
+
+        results = {}
+        for act in gameState.getLegalActions(0):
+            next_state = gameState.generateSuccessor(gameState.turn,act)
+            next_state.turn = next_state.switch_turn(gameState.turn)
+            results[act] = expectiminimax(self.depth-1,next_state)
+        #print(results)
+        return max(results,key = lambda x: results[x])
+        # return max(gameState.getLegalActions(0),
+        #            key = lambda x: expectiminimax(self.depth,gameState.generateSuccessor(u.AI,x)))
