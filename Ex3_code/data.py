@@ -18,13 +18,13 @@ def watch_data_info(data):
 
 def print_data(data):
 
-    print(f"number of users are :  {None}")
-    print(f"number of movies ranked are : {None}")
-    print(f"number of notation are: {None}")
-    print(f"minimum number of ratings given to a film : {None}")
-    print(f"maximum number of ratings given to a film : {None}")
-    print(f"minimum number of movies ratings by user : {None}")
-    print(f"maximum number of movies ratings by user : {None}")
+    print(f"number of users are :  {len(data.UserId.unique())}")
+    print(f"number of movies ranked are : {len(data.ProductId.unique())}")
+    print(f"number of notation are: {len(data.Rating.unique())}")
+    print(f"minimum number of ratings given to a film : {data.ProductId.value_counts().min()}")
+    print(f"maximum number of ratings given to a film : {data.ProductId.value_counts().max()}")
+    print(f"minimum number of movies ratings by user : {data.UserId.value_counts().min()}")
+    print(f"maximum number of movies ratings by user : {data.UserId.value_counts().max()}")
 
 
 
