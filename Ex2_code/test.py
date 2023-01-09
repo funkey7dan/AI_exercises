@@ -67,3 +67,4 @@ if __name__ == '__main__':
                 print("Test file:   ***"+f.split('\\')[1] + "***   Good! :)")
             else:
                 print("Test file:   ***"+f.split('\\')[1] + "***   Something went wromg... ")
+                print(f'Expected: {result} but got {studentResult}')

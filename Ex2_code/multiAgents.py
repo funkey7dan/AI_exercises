@@ -114,7 +114,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
             next_state = gameState.generateSuccessor(gameState.turn,act)
             next_state.turn = next_state.switch_turn(gameState.turn)
             results[act] = minMax_Value(self.depth-1,next_state)
-        #print(results)
+        print(results)
         return max(results,key = lambda x: (results[x],x))
         # return max(gameState.getLegalActions(0),key = lambda x: minMax_Value(self.depth,
         # gameState))
@@ -157,7 +157,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             next_state.turn = next_state.switch_turn(gameState.turn)
             results[act] = alpha_beta_minimax(self.depth-1,next_state,alpha = -math.inf,
                                                       beta = math.inf)
-        #print(results)
+        print(results)
         return max(results,key = lambda x: (results[x],x))
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
@@ -180,19 +180,9 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
 
             if game_state.turn == u.AI:
                 value = -math.inf
-                # for a in game_state.getLegalActions():
-                #     # next_state = game_state.generateSuccessor(game_state.turn,a)
-                #     # next_state.turn = next_state.switch_turn(next_state.turn)
-                #     value = max(value,expectiminimax(depth - 1,generate_switch(game_state,a)))
                 values = (expectiminimax(depth - 1,generate_switch(game_state,a)) for a in game_state.getLegalActions())
                 return max(value,max(values))
             else:
-                # value = 0
-                # for a in game_state.getLegalActions():
-                #     # next_state = game_state.generateSuccessor(game_state.turn,a)
-                #     # next_state.turn = next_state.switch_turn(next_state.turn)
-                #     p = 1 / len(game_state.getLegalActions())
-                #     value += p * (expectiminimax(depth - 1,generate_switch(game_state,a)))
                 p = 1 / len(game_state.getLegalActions())
                 value = sum(p *expectiminimax(depth - 1,generate_switch(game_state,a)) for a in game_state.getLegalActions())
             return value
@@ -202,7 +192,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             next_state = gameState.generateSuccessor(gameState.turn,act)
             next_state.turn = next_state.switch_turn(gameState.turn)
             results[act] = expectiminimax(self.depth-1,next_state)
-        #print(results)
+        print(results)
         return max(results,key = lambda x: results[x])
         # return max(gameState.getLegalActions(0),
         #            key = lambda x: expectiminimax(self.depth,gameState.generateSuccessor(u.AI,x)))

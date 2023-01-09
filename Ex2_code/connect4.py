@@ -262,8 +262,9 @@ class GameState:
         '''
         switch the turn in the state and return the updated player turn
         '''
-        self.turn = (piece +1) % 2
+        self.turn = (piece + 1) % 2
         return self.turn
+
 
 
 
@@ -283,6 +284,7 @@ class GameState:
         state.data._agentMoved = agentIndex
         GameState.explored.add(self)
         GameState.explored.add(state)
+
         return state
 
 
@@ -378,6 +380,8 @@ if __name__ == '__main__':
     gameMode  = 1
     depth = 3 # must be at least 3 with different agent then Random
     type = "MinimaxAgent"
+    type = "ExpectimaxAgent"
+    type ="AlphaBetaAgent"
 
     agent = None
     if gameMode  == 1:
