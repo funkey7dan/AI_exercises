@@ -4,6 +4,8 @@ from sklearn.metrics import mean_squared_error
 
 def RMSE(test_set,cf):
     "*** YOUR CODE HERE ***"
+    # Create an array of the ratings from the test set, and an array for the predicted ratings,
+    # by using the UserId and ProductId from the test set to get the predicted rating from the user-item matrix
     rmse = mean_squared_error(np.array(test_set['Rating']),
                               np.array([cf.pred.at[row] for row in zip(test_set['UserId'],test_set['ProductId'])]),
                               squared = False).round(5)
@@ -28,7 +30,7 @@ def precision_at_k(test_set,cf,k):
 
     # Create a list of Relevant_Items_Recommended / k to get the precision at k for each user, and take mean
     precision = np.mean(
-        [len(recommended_items[user].intersection(pd.Index(relevant_dict[user]))) / k for user in users]).round(5)
+        [len(pd.Index(recommended_items[user]).intersection(pd.Index(relevant_dict[user]))) / k for user in users]).round(5)
     print(f'Precision at {k} is {precision}')
 
     # get the top k items from the user-item mean matrix and calculate the precision at k for each user
@@ -46,7 +48,7 @@ def recall_at_k(test_set,cf,k):
     # take the length of the intersection of the recommended items and the relevant items
     # divide by the length of the relevant items
     recall = np.mean(
-        [len(pd.Index(relevant_dict[user]).intersection(recommended_items[user])) / len(relevant_dict[user]) for user in
+        [len(pd.Index(relevant_dict[user]).intersection(pd.Index(recommended_items[user]))) / len(relevant_dict[user]) for user in
          users]).round(5)
     print(f'recall at {k} is {recall}')
 

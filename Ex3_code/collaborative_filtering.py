@@ -26,17 +26,13 @@ class Recommender:
         ratings_pd = self.user_item_matrix
         ratings = ratings_pd.to_numpy()
         mean_user_rating = user_means.to_numpy().reshape(-1,1)
-        #mean_user_rating.round(2)
         ratings_diff = (ratings - mean_user_rating)
         ratings_diff[np.isnan(ratings_diff)] = 0
-        #ratings_diff.round(2)
 
         if self.strategy == 'user':
             # User - User based collaborative filtering
             start_time = time.time()
             user_similarity = 1 - pairwise_distances(ratings_diff,metric = 'cosine')
-            #pd.DataFrame(user_similarity)
-            #pd.DataFrame(user_similarity.dot(ratings_diff))
             pred = mean_user_rating + user_similarity.dot(ratings_diff) / np.array(
                 [np.abs(user_similarity).sum(axis = 1)]).T
             self.pred = pd.DataFrame(pred,matrix.index,
@@ -64,6 +60,12 @@ class Recommender:
 
     def recommend_items(self,user_id,k = 5):
         " * ** YOUR CODE HERE ** * "
-        #pred_clean = self.pred.where(self.user_item_matrix.isna(),0)
-        return self.pred_clean.loc[user_id].sort_values(ascending = False).head(k).index
+        row_index_list = self.pred_clean.iloc[0].index.tolist()
+        sorted = self.pred_clean.loc[user_id].sort_values(ascending = False,kind = 'mergesort')
+        out = sorted.head(k).index.tolist()
+        out_list = []
+        for i in range(len(out)):
+            out_list.append((out[i],sorted[out[i]],row_index_list.index(out[i])))
+        print(out_list)
+        return out
 
