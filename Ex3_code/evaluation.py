@@ -50,6 +50,7 @@ def recall_at_k(test_set,cf,k):
     recall = np.mean(
         [len(pd.Index(relevant_dict[user]).intersection(pd.Index(recommended_items[user]))) / len(relevant_dict[user]) for user in
          users]).round(5)
+
     print(f'recall at {k} is {recall}')
 
     bench = cf.user_item_matrix.mean(axis = 0).sort_values(ascending = False)[:k]

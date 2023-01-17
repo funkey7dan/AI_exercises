@@ -26,7 +26,7 @@ class Recommender:
         ratings_pd = self.user_item_matrix
         ratings = ratings_pd.to_numpy()
         mean_user_rating = user_means.to_numpy().reshape(-1,1)
-        ratings_diff = (ratings - mean_user_rating)
+        ratings_diff = (ratings - mean_user_rating + 0.0001)
         ratings_diff[np.isnan(ratings_diff)] = 0
 
         if self.strategy == 'user':
@@ -60,12 +60,5 @@ class Recommender:
 
     def recommend_items(self,user_id,k = 5):
         " * ** YOUR CODE HERE ** * "
-        row_index_list = self.pred_clean.iloc[0].index.tolist()
-        sorted = self.pred_clean.loc[user_id].sort_values(ascending = False,kind = 'mergesort')
-        out = sorted.head(k).index.tolist()
-        out_list = []
-        for i in range(len(out)):
-            out_list.append((out[i],sorted[out[i]],row_index_list.index(out[i])))
-        print(out_list)
-        return out
+        return self.pred_clean.loc[user_id].sort_values(ascending = False,kind = 'mergesort').head(k).index.tolist()
 
